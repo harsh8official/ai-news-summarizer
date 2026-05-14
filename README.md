@@ -1,4 +1,4 @@
-# AI Summary Studio
+# AI News Summarizer
 
 A Flask-based NLP summarizer that can summarize pasted text, uploaded PDF files, and YouTube video transcripts.
 
