@@ -8,17 +8,12 @@ from flask import Flask, render_template, request
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 
-try:
-    from transformers import pipeline
-except ImportError:
-    pipeline = None
-
 
 app = Flask(__name__)
 
 # Replace this value with your own key from https://newsapi.org/
 # You can also set NEWS_API_KEY in your environment for deployment.
-API_KEY = os.getenv("NEWS_API_KEY", "7853bebe63214572a496e840ba8467c5")
+API_KEY = os.getenv("NEWS_API_KEY", "YOUR_NEWS_API_KEY")
 NEWS_API_URL = "https://newsapi.org/v2/top-headlines"
 
 
@@ -47,10 +42,9 @@ def get_summarizer():
     """
     model_name = "sshleifer/distilbart-cnn-12-6"
 
-    if pipeline is None:
-        return {"type": "nltk_extractive"}
-
     try:
+        from transformers import pipeline
+
         return {
             "type": "pipeline",
             "model": pipeline("summarization", model=model_name),
@@ -68,6 +62,12 @@ def get_summarizer():
             }
         except Exception:
             return {"type": "nltk_extractive"}
+
+
+@app.route("/health")
+def health():
+    """Simple health check for deployment platforms."""
+    return {"status": "ok"}
 
 
 def clean_text(text):
@@ -276,4 +276,5 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
