@@ -2,8 +2,10 @@ services:
   - type: web
     name: ai-news-summarizer
     env: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements-render.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
     envVars:
       - key: NEWS_API_KEY
         sync: false
+      - key: ENABLE_TRANSFORMERS
+        value: false
