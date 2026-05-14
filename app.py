@@ -15,6 +15,7 @@ app = Flask(__name__)
 # You can also set NEWS_API_KEY in your environment for deployment.
 API_KEY = os.getenv("NEWS_API_KEY", "YOUR_NEWS_API_KEY")
 NEWS_API_URL = "https://newsapi.org/v2/top-headlines"
+ENABLE_TRANSFORMERS = os.getenv("ENABLE_TRANSFORMERS", "false").lower() == "true"
 
 
 def ensure_nltk_data():
@@ -41,6 +42,9 @@ def get_summarizer():
     HuggingFace model fallback, and finally falls back to NLTK summarization.
     """
     model_name = "sshleifer/distilbart-cnn-12-6"
+
+    if not ENABLE_TRANSFORMERS:
+        return {"type": "nltk_extractive"}
 
     try:
         from transformers import pipeline
@@ -237,6 +241,9 @@ def build_news_cards(articles):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    if request.method == "HEAD":
+        return "", 200
+
     topic = request.form.get("topic", "").strip()
     category = request.form.get("category", "technology")
     custom_text = request.form.get("custom_text", "").strip()
