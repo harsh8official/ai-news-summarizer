@@ -3,22 +3,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AI News Summarizer</title>
+    <title>AI Summary Studio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">AI News Summarizer</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="ms-auto d-flex align-items-center gap-2">
-                    <span class="text-white small">Dark mode</span>
-                    <button class="btn btn-light btn-sm" id="darkModeToggle" type="button">Toggle</button>
-                </div>
+            <a class="navbar-brand fw-bold" href="/">AI Summary Studio</a>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <span class="text-white small">Dark mode</span>
+                <button class="btn btn-light btn-sm" id="darkModeToggle" type="button">Toggle</button>
             </div>
         </div>
     </nav>
@@ -26,25 +21,17 @@
     <header class="hero-section">
         <div class="container">
             <div class="row align-items-center g-4">
-                <div class="col-lg-7">
-                    <p class="text-uppercase fw-semibold text-primary mb-2"></p>
-                    <h1 class="display-5 fw-bold">AI News Summarizer </h1>
-                    <p class="lead text-muted">Fetch current headlines, summarize articles with transformers, and generate concise summaries from your own pasted text.</p>
+                <div class="col-lg-8">
+                    <p class="text-uppercase fw-semibold text-primary mb-2">NLP Summarizer</p>
+                    <h1 class="display-5 fw-bold">Summarize text, PDFs, and YouTube videos</h1>
+                    <p class="lead text-muted">Upload a PDF, paste content, or enter a YouTube link to generate a concise summary using NLP.</p>
                 </div>
-                <div class="col-lg-5">
-                    <form method="POST" class="search-panel shadow-sm" id="newsForm">
-                        <label for="topic" class="form-label fw-semibold">Search news topic</label>
-                        <input class="form-control mb-3" id="topic" name="topic" value="{{ topic }}" placeholder="Example: artificial intelligence">
-
-                        <label for="category" class="form-label fw-semibold">Category</label>
-                        <select class="form-select mb-3" id="category" name="category">
-                            {% for item in categories %}
-                                <option value="{{ item }}" {% if item == category %}selected{% endif %}>{{ item.title() }}</option>
-                            {% endfor %}
-                        </select>
-
-                        <button class="btn btn-primary w-100" type="submit">Fetch Latest News</button>
-                    </form>
+                <div class="col-lg-4">
+                    <div class="tool-preview shadow-sm">
+                        <span>Text</span>
+                        <span>PDF</span>
+                        <span>YouTube</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -55,22 +42,69 @@
             <div class="alert alert-warning shadow-sm">{{ error }}</div>
         {% endif %}
 
+        <section class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="summary-box shadow-sm h-100">
+                    <div class="section-heading">
+                        <h2 class="fw-bold">PDF Summarizer</h2>
+                        <p class="text-muted">Upload a PDF file and generate a short summary from its text.</p>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data" id="pdfForm">
+                        <input type="hidden" name="action" value="pdf">
+                        <label for="pdf_file" class="form-label fw-semibold">Upload PDF</label>
+                        <input class="form-control" id="pdf_file" name="pdf_file" type="file" accept="application/pdf">
+                        <button class="btn btn-primary mt-3" type="submit">Summarize PDF</button>
+                    </form>
+
+                    {% if pdf_summary %}
+                        <div class="result-box mt-4">
+                            <h5 class="fw-bold">PDF Summary</h5>
+                            <p class="mb-0">{{ pdf_summary }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="summary-box shadow-sm h-100">
+                    <div class="section-heading">
+                        <h2 class="fw-bold">YouTube Summarizer</h2>
+                        <p class="text-muted">Paste a YouTube video link and summarize the transcript.</p>
+                    </div>
+
+                    <form method="POST" id="youtubeForm">
+                        <input type="hidden" name="action" value="youtube">
+                        <label for="youtube_url" class="form-label fw-semibold">YouTube URL</label>
+                        <input class="form-control" id="youtube_url" name="youtube_url" value="{{ youtube_url }}" placeholder="https://www.youtube.com/watch?v=...">
+                        <button class="btn btn-danger mt-3" type="submit">Summarize Video</button>
+                    </form>
+
+                    {% if youtube_summary %}
+                        <div class="result-box mt-4">
+                            <h5 class="fw-bold">YouTube Summary</h5>
+                            <p class="mb-0">{{ youtube_summary }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
         <section class="mb-5">
             <div class="section-heading">
-                <h2 class="fw-bold">User Text Summarizer</h2>
-                <p class="text-muted">Paste a long article or paragraph and generate a short AI summary.</p>
+                <h2 class="fw-bold">Text Summarizer</h2>
+                <p class="text-muted">Paste a long article, notes, or paragraph and generate a short summary.</p>
             </div>
 
             <form method="POST" class="summary-box shadow-sm" id="summaryForm">
-                <input type="hidden" name="topic" value="{{ topic }}">
-                <input type="hidden" name="category" value="{{ category }}">
-                <textarea class="form-control" name="custom_text" rows="7" placeholder="Paste your news article text here...">{{ custom_text }}</textarea>
-                <button class="btn btn-success mt-3" type="submit">Summarize</button>
+                <input type="hidden" name="action" value="text">
+                <textarea class="form-control" name="custom_text" rows="7" placeholder="Paste your text here...">{{ custom_text }}</textarea>
+                <button class="btn btn-success mt-3" type="submit">Summarize Text</button>
             </form>
 
             {% if custom_summary %}
                 <div class="result-box mt-4 shadow-sm">
-                    <h5 class="fw-bold">AI Summary</h5>
+                    <h5 class="fw-bold">Text Summary</h5>
                     <p class="mb-3">{{ custom_summary }}</p>
                     {% if nlp_stats %}
                         <div class="nlp-stats">
@@ -82,52 +116,16 @@
                 </div>
             {% endif %}
         </section>
-
-        <section>
-            <div class="section-heading">
-                <h2 class="fw-bold">Latest News Summaries</h2>
-                <p class="text-muted">Bootstrap cards display article details and transformer-generated summaries.</p>
-            </div>
-
-            {% if news_cards %}
-                <div class="row g-4">
-                    {% for news in news_cards %}
-                        <div class="col-md-6 col-xl-4">
-                            <article class="card news-card h-100 shadow-sm">
-                                {% if news.image %}
-                                    <img src="{{ news.image }}" class="card-img-top" alt="{{ news.title }}">
-                                {% endif %}
-                                <div class="card-body d-flex flex-column">
-                                    <span class="badge text-bg-primary align-self-start mb-2">{{ news.source }}</span>
-                                    <h5 class="card-title">{{ news.title }}</h5>
-                                    <p class="card-text text-muted">{{ news.description }}</p>
-                                    <div class="summary-card mt-auto">
-                                        <strong>AI Summary:</strong>
-                                        <p>{{ news.summary }}</p>
-                                    </div>
-                                    <a class="btn btn-outline-primary mt-3" href="{{ news.url }}" target="_blank" rel="noopener">Read Full Article</a>
-                                </div>
-                            </article>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state shadow-sm">
-                    <h5>No live articles displayed yet</h5>
-                    <p>Add your NewsAPI key, choose a category or topic, and fetch the latest headlines.</p>
-                </div>
-            {% endif %}
-        </section>
     </main>
 
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-3 fw-semibold">Generating AI summary...</p>
+        <p class="mt-3 fw-semibold">Generating summary...</p>
     </div>
 
     <footer class="footer py-4">
         <div class="container text-center">
-            <p class="mb-0">Built with Flask, NLTK, HuggingFace Transformers, and NewsAPI.</p>
+            <p class="mb-0">Built with Flask, NLTK, PDF extraction, and YouTube transcript summarization.</p>
         </div>
     </footer>
 

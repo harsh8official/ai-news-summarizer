@@ -20,7 +20,7 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
-.search-panel,
+.tool-preview,
 .summary-box,
 .result-box,
 .empty-state {
@@ -28,6 +28,21 @@ body {
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 24px;
+}
+
+.tool-preview {
+    display: grid;
+    gap: 12px;
+}
+
+.tool-preview span {
+    background: #eef6ff;
+    border: 1px solid #cfe1ff;
+    border-radius: 8px;
+    color: #174ea6;
+    font-weight: 700;
+    padding: 16px;
+    text-align: center;
 }
 
 .section-heading {
@@ -136,7 +151,7 @@ body.dark-mode .nlp-stats span {
         font-size: 2rem;
     }
 
-    .search-panel,
+    .tool-preview,
     .summary-box,
     .result-box,
     .empty-state {
